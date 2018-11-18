@@ -7,6 +7,6 @@ setup(name='python_athena_tools',
       author='Robin Linacre, Karik Isichei',
       author_email='robinlinacre@hotmail.com',
       license='MIT',
-      setup_requires=['pandas, pyarrow, s3fs, boto3'],
+      setup_requires=['pandas', 'pyarrow', 's3fs', 'boto3'],
       test_requires=["pylint", "coverage", "codecov"],
       zip_safe=False)
