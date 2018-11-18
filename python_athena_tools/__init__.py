@@ -133,4 +133,8 @@ class AthenaQuery():
         if "__athena_temp__" not in prefix:
             raise Exception("User has edited prefix, exiting before deleting temprary files and table for safety")
         self.boto3_bucket.objects.filter(Prefix=prefix).delete()
-        self.glue_client.delete_table(DatabaseName="deleteme", Name=self.table_name)
+        try:
+            self.glue_client.delete_table(DatabaseName="deleteme", Name=self.table_name)
+        except self.glue_client.exceptions.EntityNotFoundException:
+            #If the query never finished, the table won't have been created
+            pass

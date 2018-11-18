@@ -34,8 +34,9 @@ class TestAthenaQueryToDf(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             athena_query_to_pd_df(self.valid_sql, "blah-blah-bad-bucket")
 
-    def test_execute_valid_query(self):
-        athena_query_to_pd_df(self.valid_sql, self.temp_bucket)
+    def test_timeout(self):
+        with self.assertRaises(TimeoutError) as context:
+            athena_query_to_pd_df(self.valid_sql, self.temp_bucket, timeout_seconds=1)
 
     # No files should exist after running
     def test_removes_files(self):
@@ -43,6 +44,9 @@ class TestAthenaQueryToDf(unittest.TestCase):
         objs = self.athenaquery.boto3_bucket.objects.filter(Prefix=prefix)
 
         self.assertTrue(len(list(objs)) == 0)
+
+    def test_execute_valid_query(self):
+        athena_query_to_pd_df(self.valid_sql, self.temp_bucket)
 
 if __name__ == '__main__':
     unittest.main()
