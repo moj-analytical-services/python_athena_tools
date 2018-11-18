@@ -29,6 +29,7 @@ class AthenaQuery():
 
     #TODO:  Get region from AWS_DEFAULT_REGION env variable
     def __init__(self, sql_query, temp_bucket, timeout_seconds, region='eu-west-1'):
+        self.verify_sql(sql_query)
 
         self.s3_client = boto3.client('s3')
         self.temp_bucket = temp_bucket
@@ -48,12 +49,17 @@ class AthenaQuery():
 
     def __enter__(self):
         self.query_response = self.athena_client.start_query_execution(
-            QueryString=self.sql_query_with_create_table(),
+            QueryString=self.sql_with_create_table(),
             ResultConfiguration={'OutputLocation': self.base_output_path}
         )
 
         self.start_time = time.time()
         return self
+
+    def verify_sql(self, sql_query):
+        sql_temp = sql_query.strip().lower()
+        if not sql_temp.startswith("select"):
+            raise ValueError("The sql statement must be a select query i.e. it must start with the token 'select'")
 
     def verify_bucket(self, bucket):
         if "/" in bucket or ":" in bucket:
@@ -65,8 +71,9 @@ class AthenaQuery():
             # The bucket does not exist or you have no access.
             raise Exception("The bucket you specified does not exist or you don't have access to it")
 
-    def sql_query_with_create_table(self):
-        # TODO:  Check that it doesn't already have create table as
+    def sql_with_create_table(self):
+
+
 
         uid = str(uuid.uuid4()).replace("-", "")
         self.table_name = "deleteme{}".format(uid)
@@ -102,7 +109,7 @@ class AthenaQuery():
                 raise Exception("Athena failed - unknown reason (printing full response):\n {athena_status}".format(athena_status))
 
             if self.timedout():
-                athena_client.stop_query_execution(QueryExecutionId=self.query_response['QueryExecutionId'])
+                self.athena_client.stop_query_execution(QueryExecutionId=self.query_response['QueryExecutionId'])
                 raise TimeoutError('Your query took longer than the timeout you set')
 
     def timedout(self):
