@@ -28,7 +28,7 @@ def athena_query_to_pd_df(sql_query, temp_bucket, timeout_seconds = 1e10, region
 class AthenaQuery():
 
     #TODO:  Get region from AWS_DEFAULT_REGION env variable
-    def __init__(self, sql_query, temp_bucket, timeout_seconds, region='eu-west-1'):
+    def __init__(self, sql_query, temp_bucket, timeout_seconds = 1e10, region='eu-west-1'):
         self.verify_sql(sql_query)
 
         self.s3_client = boto3.client('s3')
@@ -63,7 +63,7 @@ class AthenaQuery():
 
     def verify_bucket(self, bucket):
         if "/" in bucket or ":" in bucket:
-            raise Exception("Bucket should be the bucket name only e.g. alpha-mydata.  It should not include s3:// or anything else")
+            raise ValueError("Bucket should be the bucket name only e.g. alpha-mydata.  It should not include s3:// or anything else")
 
         try:
             self.s3_client.head_bucket(Bucket=self.temp_bucket)
