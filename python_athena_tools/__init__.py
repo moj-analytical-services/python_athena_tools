@@ -73,8 +73,6 @@ class AthenaQuery():
 
     def sql_with_create_table(self):
 
-
-
         uid = str(uuid.uuid4()).replace("-", "")
         self.table_name = "deleteme{}".format(uid)
         additional_sql = """
